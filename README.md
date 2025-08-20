@@ -1,19 +1,19 @@
-# Documentación de Setup: Laravel + Vue + Inertia + Vite + Docker (WSL2 Compatible)
+# Setup Documentation: Laravel + Vue + Inertia + Vite + Docker (WSL2 Compatible)
 
-Este documento describe paso a paso cómo crear un entorno de desarrollo moderno utilizando Laravel con Vue (Inertia.js), Vite, Docker y WSL2, incluyendo configuraciones para permisos, hot module reload y problemas comunes solucionados.
-
----
-
-## 1. Requisitos previos
-
-* Docker Desktop (con WSL2 habilitado)
-* WSL2 con Ubuntu (o distro Linux)
-* Composer instalado en WSL
-* Node.js y npm instalados
+This document describes step-by-step how to create a modern development environment using Laravel with Vue (Inertia.js), Vite, Docker, and WSL2, including configurations for permissions, hot module reload, and common issues resolved.
 
 ---
 
-## 2. Estructura base del proyecto
+## 1. Prerequisites
+
+* Docker Desktop (with WSL2 enabled)
+* WSL2 with Ubuntu (or other Linux distro)
+* Composer installed in WSL
+* Node.js and npm installed
+
+---
+
+## 2. Base Project Structure
 
 ```
 project-root/
@@ -21,12 +21,12 @@ project-root/
 ├── Dockerfile
 ├── init-laravel.sh
 ├── fix-permissions.sh
-└── src/              # Proyecto Laravel se crea aquí
+└── src/              # Laravel project is created here
 ```
 
 ---
 
-## 3. Crear el proyecto Laravel localmente
+## 3. Create Laravel Project Locally
 
 ```bash
 cd project-root
@@ -34,7 +34,7 @@ mkdir src && cd src
 composer create-project laravel/laravel . --prefer-dist
 ```
 
-Agregar Jetstream + Vue (opcional):
+Add Jetstream + Vue (optional):
 
 ```bash
 composer require laravel/jetstream
@@ -42,7 +42,7 @@ php artisan jetstream:install vue
 npm install && npm run build
 ```
 
-Copiar archivo .env y generar clave:
+Copy the `.env` file and generate the key:
 
 ```bash
 cp .env.example .env
@@ -51,9 +51,9 @@ php artisan key:generate
 
 ---
 
-## 4. Vite config con HMR para Docker
+## 4. Vite Config with HMR for Docker
 
-Archivo `vite.config.ts`:
+`vite.config.ts`:
 
 ```ts
 import vue from '@vitejs/plugin-vue';
@@ -91,11 +91,11 @@ export default defineConfig({
 
 ---
 
-## 5. Docker: archivos clave
+## 5. Docker: Key Files
 
 ### `Dockerfile`
 
-Basado en `php:8.3-apache`, con soporte para PostgreSQL, Node, Composer, Laravel Installer. Se expone Apache en `:80`.
+Based on `php:8.3-apache`, with support for PostgreSQL, Node, Composer, Laravel Installer. Exposes Apache on port `:80`.
 
 ### `docker-compose.yml`
 
@@ -148,7 +148,7 @@ services:
     ports:
       - "5173:5173"
     command: >
-      sh -c "while [ ! -f package.json ]; do echo '⏳ Esperando package.json...'; sleep 2; done && npm install && npm run dev"
+      sh -c "while [ ! -f package.json ]; do echo '⏳ Waiting for package.json...'; sleep 2; done && npm install && npm run dev"
     depends_on:
       - app
     networks:
@@ -166,16 +166,16 @@ networks:
 
 ---
 
-## 6. Script de inicialización Laravel
+## 6. Laravel Initialization Script
 
-### `init-laravel.sh` (fragmento final)
+### `init-laravel.sh` (final fragment)
 
 ```bash
-# Permisos de Laravel
+# Laravel permissions
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
-# Migraciones y limpieza
+# Migrations and cleanup
 php artisan migrate --force
 php artisan config:clear
 php artisan cache:clear
@@ -186,7 +186,7 @@ exec apache2-foreground
 
 ---
 
-## 7. Corrección de permisos desde el host
+## 7. Fix Permissions from Host
 
 ### `fix-permissions.sh`
 
@@ -197,18 +197,18 @@ PROJECT_DIR="./src"
 USER_ID=$(id -u)
 GROUP_ID=$(id -g)
 
-echo "🔧 Corrigiendo permisos en $PROJECT_DIR..."
+echo "🔧 Fixing permissions in $PROJECT_DIR..."
 
-chown -R $USER_ID:$GROUP_ID $PROJECT_DIR || echo "⚠️  No se pudo cambiar el dueño (volumen montado?)"
+chown -R $USER_ID:$GROUP_ID $PROJECT_DIR || echo "⚠️  Could not change owner (mounted volume?)"
 chmod -R ug+rwX $PROJECT_DIR/storage $PROJECT_DIR/bootstrap/cache
 chmod -R ug+rwX $PROJECT_DIR/node_modules || true
 
-echo "✅ Permisos corregidos."
+echo "✅ Permissions fixed."
 ```
 
 ---
 
-## 8. Variables importantes en `.env`
+## 8. Important Variables in `.env`
 
 ```env
 APP_URL=http://localhost
@@ -224,7 +224,7 @@ DB_PASSWORD=postgres
 
 ---
 
-## 9. Crear un usuario manual (si no tienes frontend de registro)
+## 9. Create a User Manually (if no registration frontend)
 
 ```bash
 php artisan tinker
@@ -238,37 +238,37 @@ User::create([
 
 ---
 
-## 10. Comandos de desarrollo rápido
+## 10. Quick Development Commands
 
 ```bash
 ./fix-permissions.sh
 npm install
 npm run dev
 
-# Lanzar stack
+# Launch stack
 docker compose up --build
 
-# Acceder a Laravel
+# Access Laravel
 http://localhost:8000
 
-# Acceder a Vite (debug)
+# Access Vite (debug)
 http://localhost:5173
 ```
 
 ---
 
-## ✅ Resultado esperado
+## ✅ Expected Result
 
-* Laravel funcional en `localhost:8000`
-* Vite con HMR funcionando desde `localhost:5173`
-* Vue montado vía Inertia
-* Migraciones aplicadas
-* Permisos resueltos incluso en WSL2
-* Cero errores de CORS, chown, o `0B` en scripts
+* Laravel running at `localhost:8000`
+* Vite with HMR running at `localhost:5173`
+* Vue mounted via Inertia
+* Migrations applied
+* Permissions resolved even in WSL2
+* Zero errors from CORS, `chown`, or empty scripts
 
 ---
 
-## 🧠 Recomendado
+## 🧠 Recommended
 
-* Agrega `.vscode/settings.json` para formateo, paths y compatibilidad de entornos
-* Usar `make dev` o `npm run sail` para automatizar flujo dev en el futuro
+* Add `.vscode/settings.json` for formatting, paths, and environment compatibility
+* Use `make dev` or `npm run sail` to automate the dev workflow in the future

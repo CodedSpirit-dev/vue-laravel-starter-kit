@@ -89,6 +89,10 @@ php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
 
+# Permisos de Laravel
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+
 # Crear usuario adminUser::create([
 php artisan tinker --execute="App\Models\User::factory()->create(
 ['name' => 'Admin User', 'email' => 'admin@example.com',

@@ -46,5 +46,7 @@ RUN chmod +x /usr/local/bin/init-laravel.sh
 # Expone el puerto de Apache
 EXPOSE 80
 
+RUN npm i -g pnpm@9
+
 # Comando para inicializar Laravel si no existe
 CMD ["/usr/local/bin/init-laravel.sh"]

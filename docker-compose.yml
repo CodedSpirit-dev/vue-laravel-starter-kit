@@ -11,10 +11,9 @@ services:
       - 8.8.4.4
     volumes:
       - ./src:/var/www/html
-      # Excluir node_modules del volume mount
       - laravel_node_modules:/var/www/html/node_modules
     ports:
-      - "8000:80"  # Cambiado a 8000 para consistencia con Laravel
+      - "8000:80"
     environment:
       - DEBIAN_FRONTEND=noninteractive
       - DB_HOST=db
@@ -49,20 +48,23 @@ services:
     volumes:
       - ./src:/var/www/html
       - vite_node_modules:/var/www/html/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=1
+      - VITE_PORT=5173
+      - VITE_HMR_HOST=host.docker.internal
+      - VITE_HMR_CLIENT_PORT=5173
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # necesario en Docker Linux/WSL2
     ports:
-      - "${VITE_PORT:-5173}:${VITE_PORT:-5173}"
+      - "5173:5173"
     command: >
       sh -c "
-        echo '⏳ Esperando package.json...' &&
         while [ ! -f package.json ]; do sleep 2; done &&
-        echo '📦 Instalando dependencias...' &&
-        npm install &&
-        npm run dev -- --host 0.0.0.0
+        npm ci || npm i &&
+        npx vite --host 0.0.0.0 --port ${VITE_PORT}
       "
-    depends_on:
-      - app
-    networks:
-      - app-network
+    depends_on: [app]
+    networks: [app-network]
 
 
 volumes:

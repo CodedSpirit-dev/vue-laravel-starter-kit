@@ -69,6 +69,9 @@ sed -i "s/^DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE}/" .env
 sed -i "s/^DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME}/" .env
 sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD}/" .env
 
+# Ejecutar migraciones
+php artisan migrate
+
 # --- 7. Esperar base de datos ---
 log "⏳ Esperando conexión a la base de datos..."
 until php artisan migrate:status &>/dev/null; do
@@ -85,6 +88,17 @@ log "🧹 Limpiando caché..."
 php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
+
+# Crear usuario adminUser::create([
+php artisan tinker --execute="App\Models\User::factory()->create(
+['name' => 'Admin User', 'email' => 'admin@example.com',
+'password' => Hash::make('12345678')])"
+
+php artisan tinker --execute="User::create([
+    'name' => 'Admin User',
+    'email' => 'admin@example.com',
+    'password' => Hash::make('12345678')])"
+
 
 # --- 10. Iniciar Apache ---
 log "✅ Configuración completa. Iniciando Apache..."

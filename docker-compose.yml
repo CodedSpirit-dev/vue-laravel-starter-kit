@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_vue_app
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    volumes:
+      - ./src:/var/www/html
+      # Excluir node_modules del volume mount
+      - laravel_node_modules:/var/www/html/node_modules
+    ports:
+      - "8000:80"  # Cambiado a 8000 para consistencia con Laravel
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=data_entry
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:17  # Usar PostgreSQL 17 para compatibilidad
+    container_name: laravel_vue_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: data_entry
+    ports:
+      - "5435:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # Servicio para Vite (desarrollo frontend)
+  vite:
+    image: node:24-alpine
+    container_name: laravel_vue_vite
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+      - vite_node_modules:/var/www/html/node_modules
+    ports:
+      - "${VITE_PORT:-5173}:${VITE_PORT:-5173}"
+    command: >
+      sh -c "
+        echo '⏳ Esperando package.json...' &&
+        while [ ! -f package.json ]; do sleep 2; done &&
+        echo '📦 Instalando dependencias...' &&
+        npm install &&
+        npm run dev -- --host 0.0.0.0
+      "
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+
+volumes:
+  db_data:
+  laravel_node_modules:
+  vite_node_modules:
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,43 @@
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true,
+        "source.fixAll.eslint": true
+    },
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "vue",
+        "typescript",
+        "typescriptreact"
+    ],
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/vendor": true,
+        "**/storage": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/vendor": true,
+        "**/storage": true
+    },
+    "emmet.includeLanguages": {
+        "vue-html": "html",
+        "vue": "html"
+    },
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "vetur.validation.template": false,
+    "volar.takeOverMode.enabled": true,
+    "php.validate.executablePath": "/usr/bin/php",
+    "blade.format.enable": true,
+    "files.watcherExclude": {
+        "**/vendor/**": true,
+        "**/node_modules/**": true
+    },
+    "vite.enableHMR": true,
+    "vite.hmrOverlay": true,
+    "liveServer.settings.port": 5500,
+    "liveServer.settings.root": "/public",
+    "liveServer.settings.donotShowInfoMsg": true,
+    "explorer.confirmDelete": false
+}
